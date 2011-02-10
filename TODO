@@ -1,0 +1,13 @@
+* Native Compression. (RAR?)
+* Support file type sockets.
+* Fully support 64 bits.
+* Split some more file Code.
+* Rollback failed installation.
+* before/after scripts.
+* fix cmd.
+* wrap around types for db ops.
+* Resolve file conflicts.
+* Integrate digital signature.
+* Write more documentation.
+* TCP Capabilities for search.
+* update package.

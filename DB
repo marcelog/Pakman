@@ -1,0 +1,13 @@
+\
+	\VERSION (db version)
+	\DATE (db date)
+	\PKG_name (name of package installed) = install date
+		\PKG_VERSION
+		\PKG_FILES (total files)
+		\PKG_DIRS (total dirs)
+		\PKG_RDATE (release date)
+		\PKG_DIR_M (name of dir number m)
+		\PKG_DIR_FINFO (stat of dir number m)
+		\PKG_FILE_M (name of file number m)
+		\PKG_FILE_M_FINFO (stat struct for file m)
+		\PKG_FILE_M_SHA (sha for file m)

@@ -1,0 +1,247 @@
+http://www.mail-archive.com/debian-glibc@lists.debian.org/msg25565.html
+
+debian-glibc  
+
+    * <-- Thread -->
+    * <-- Date -->
+    * Find
+
+Bug#178960: marked as done (libc6-dev: sys/stat.h: lstat declaration omitted with -ansi compiler option)
+
+Debian Bug Tracking System
+Mon, 05 Jul 2004 05:38:22 -0500
+
+Your message dated Mon, 05 Jul 2004 19:30:52 +0900
+with message-id <[EMAIL PROTECTED]>
+and subject line Bug#178960: libc6-dev: sys/stat.h: lstat declaration omitted 
+with -ansi compiler option
+has caused the attached Bug report to be marked as done.
+
+This means that you claim that the problem has been dealt with.
+If this is not the case it is now your responsibility to reopen the
+Bug report if necessary, and/or fix the problem forthwith.
+
+(NB: If you are a system administrator and have no idea what I am
+talking about this indicates a serious mail system misconfiguration
+somewhere.  Please contact me immediately.)
+
+Debian bug tracking system administrator
+(administrator, Debian Bugs database)
+
+--------------------------------------
+Received: (at submit) by bugs.debian.org; 29 Jan 2003 19:08:00 +0000
+>From [EMAIL PROTECTED] Wed Jan 29 13:07:57 2003
+Return-path: <[EMAIL PROTECTED]>
+Received: from (l1.bsrd.net) [66.153.99.6] (qmailr)
+        by master.debian.org with smtp (Exim 3.12 1 (Debian))
+        id 18dxYx-0001eq-00; Wed, 29 Jan 2003 13:07:56 -0600
+Received: (qmail 4700 invoked by uid 1001); 29 Jan 2003 19:07:55 -0000
+Date: 29 Jan 2003 19:07:55 -0000
+Message-ID: <[EMAIL PROTECTED]>
+From: Jeff Sheinberg <[EMAIL PROTECTED]>
+Subject: libc6-dev: sys/stat.h: lstat declaration omitted with -ansi compiler 
+option
+To: [EMAIL PROTECTED]
+X-Mailer: bug 3.3.10.2
+X-Debbugs-CC: Jeff Sheinberg <[EMAIL PROTECTED]>
+Delivered-To: [EMAIL PROTECTED]
+X-Spam-Status: No, hits=-1.5 required=5.0
+        tests=SIGNATURE_LONG_SPARSE,SPAM_PHRASE_00_01
+        version=2.41
+X-Spam-Level: 
+
+Package: libc6-dev
+Version: 2.2.5-14.3
+Severity: normal
+
+Hi,
+
+When I include <sys/stat.h> and also specify the "-ansi" option to
+the C compiler, then the declaration for the "lstat" function is
+omitted.
+
+Note that the declaration for the "fstat" function is properly
+generated, regardless of whether the "-ansi" option is specified
+or not.
+
+Here is the simplest test case that I could come up with,
+
+    227 jeff ~ $  echo '#include <sys/stat.h>' | gcc-2.95  -c - -E | grep
+    -e [fl]stat
+    extern int fstat (int __fd, struct stat *__buf)  ;
+    extern int lstat (__const char *__restrict __file,
+    extern __inline__ int lstat (__const char *__path,
+    extern __inline__ int fstat (int __fd, struct stat *__statbuf)
+
+    228 jeff ~ $  echo '#include <sys/stat.h>' | gcc-2.95 -ansi -c - -E |
+    grep  -e [fl]stat
+    extern int fstat (int __fd, struct stat *__buf)  ;
+    extern __inline__ int fstat (int __fd, struct stat *__statbuf)
+
+Here is an excerpt from "/usr/include/sys/stat.h", where the
+declarations for "[fl]stat" are (supposed to be) generated,
+
+ 198: #ifndef __USE_FILE_OFFSET64
+ 199: /* Get file attributes for FILE and put them in BUF.  */
+ 200: extern int stat (__const char *__restrict __file,
+ 201:                  struct stat *__restrict __buf) __THROW;
+ 202:
+ 203: /* Get file attributes for the file, device, pipe, or socket
+ 204:    that file descriptor FD is open on and put them in BUF.  */
+ 205: extern int fstat (int __fd, struct stat *__buf) __THROW;
+ 206: #else
+ 207: # ifdef __REDIRECT
+ 208: extern int __REDIRECT (stat,
+ 209:                        (__const char *__restrict __file,
+ 210:                         struct stat *__restrict __buf) __THROW,
+ 211:                        stat64);
+ 212: extern int __REDIRECT (fstat, (int __fd, struct stat *__buf) __THROW, fsta
+t64);
+ 213: # else
+ 214: #  define stat stat64
+ 215: #  define fstat fstat64
+ 216: # endif
+ 217: #endif
+ 218: #ifdef __USE_LARGEFILE64
+ 219: extern int stat64 (__const char *__restrict __file,
+ 220:                    struct stat64 *__restrict __buf) __THROW;
+ 221: extern int fstat64 (int __fd, struct stat64 *__buf) __THROW;
+ 222: #endif
+ 223:
+ 224: #if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
+ 225: # ifndef __USE_FILE_OFFSET64
+ 226: /* Get file attributes about FILE and put them in BUF.
+ 227:    If FILE is a symbolic link, do not follow it.  */
+ 228: extern int lstat (__const char *__restrict __file,
+ 229:                   struct stat *__restrict __buf) __THROW;
+ 230: # else
+ 231: #  ifdef __REDIRECT
+ 232: extern int __REDIRECT (lstat,
+ 233:                        (__const char *__restrict __file,
+ 234:                         struct stat *__restrict __buf) __THROW,
+ 235:                        lstat64);
+ 236: #  else
+ 237: #   define lstat lstat64
+ 238: #  endif
+ 239: # endif
+ 240: # ifdef __USE_LARGEFILE64
+ 241: extern int lstat64 (__const char *__restrict __file,
+ 242:                     struct stat64 *__restrict __buf) __THROW;
+ 243: # endif
+ 244: #endif
+
+Note that I also tried the same test case as above, but in
+addition, I also included <unistd.h> as the first include
+statement, and I got the same same results, ie, the "lstat"
+declaration was not generated.
+
+I found this bug by using the C compiler's "-Wmissing-prototypes"
+option.
+
+Thanks,
+-- 
+Jeff Sheinberg
+
+
+-- System Information
+Debian Release: testing/sarge
+Kernel Version: Linux l1.bsrd.net 2.4.19-1 #1 Sat Aug 24 17:01:11 EDT 2002 i586 
+AMD-K6(tm) 3D processor AuthenticAMD GNU/Linux
+
+
+Versions of the packages libc6-dev depends on:
+ii  libc6          2.2.5-14.3     GNU C Library: Shared libraries and Timezone
+
+
+
+---------------------------------------
+Received: (at 178960-done) by bugs.debian.org; 5 Jul 2004 10:30:53 +0000
+>From [EMAIL PROTECTED] Mon Jul 05 03:30:53 2004
+Return-path: <[EMAIL PROTECTED]>
+Received: from omega.webmasters.gr.jp (webmasters.gr.jp) [218.44.239.78] 
+        by spohr.debian.org with esmtp (Exim 3.35 1 (Debian))
+        id 1BhQkP-0002Xq-00; Mon, 05 Jul 2004 03:30:53 -0700
+Received: from omega.webmasters.gr.jp (localhost [127.0.0.1])
+        by webmasters.gr.jp (Postfix) with ESMTP
+        id D918ADEB58; Mon,  5 Jul 2004 19:30:52 +0900 (JST)
+Date: Mon, 05 Jul 2004 19:30:52 +0900
+Message-ID: <[EMAIL PROTECTED]>
+From: GOTO Masanori <[EMAIL PROTECTED]>
+To: Jeff Sheinberg <[EMAIL PROTECTED]>, [EMAIL PROTECTED]
+Subject: Re: Bug#178960: libc6-dev: sys/stat.h: lstat declaration omitted with 
+-ansi compiler option
+In-Reply-To: <[EMAIL PROTECTED]>
+References: <[EMAIL PROTECTED]>
+User-Agent: Wanderlust/2.9.9 (Unchained Melody) SEMI/1.14.3 (Ushinoya)
+ FLIM/1.14.3 (=?ISO-8859-4?Q?Unebigory=F2mae?=) APEL/10.3 Emacs/21.2
+ (i386-debian-linux-gnu) MULE/5.0 (SAKAKI)
+MIME-Version: 1.0 (generated by SEMI 1.14.3 - "Ushinoya")
+Content-Type: text/plain; charset=US-ASCII
+Delivered-To: [EMAIL PROTECTED]
+X-Spam-Checker-Version: SpamAssassin 2.60-bugs.debian.org_2004_03_25 
+        (1.212-2003-09-23-exp) on spohr.debian.org
+X-Spam-Status: No, hits=-5.0 required=4.0 tests=BAYES_01,HAS_BUG_NUMBER 
+        autolearn=no version=2.60-bugs.debian.org_2004_03_25
+X-Spam-Level: 
+
+At 29 Jan 2003 19:07:55 -0000,
+Jeff Sheinberg wrote:
+> When I include <sys/stat.h> and also specify the "-ansi" option to
+> the C compiler, then the declaration for the "lstat" function is
+> omitted.
+> 
+> Note that the declaration for the "fstat" function is properly
+> generated, regardless of whether the "-ansi" option is specified
+> or not.
+> 
+> Here is the simplest test case that I could come up with,
+> 
+>     227 jeff ~ $  echo '#include <sys/stat.h>' | gcc-2.95  -c - -E | grep
+>     -e [fl]stat
+>     extern int fstat (int __fd, struct stat *__buf)  ;
+>     extern int lstat (__const char *__restrict __file,
+>     extern __inline__ int lstat (__const char *__path,
+>     extern __inline__ int fstat (int __fd, struct stat *__statbuf)
+> 
+>     228 jeff ~ $  echo '#include <sys/stat.h>' | gcc-2.95 -ansi -c - -E |
+>     grep  -e [fl]stat
+>     extern int fstat (int __fd, struct stat *__buf)  ;
+>     extern __inline__ int fstat (int __fd, struct stat *__statbuf)
+
+Look at line 224:
+
+>  224: #if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
+>  225: # ifndef __USE_FILE_OFFSET64
+>  226: /* Get file attributes about FILE and put them in BUF.
+>  227:    If FILE is a symbolic link, do not follow it.  */
+>  228: extern int lstat (__const char *__restrict __file,
+>  229:                   struct stat *__restrict __buf) __THROW;
+>  230: # else
+>  231: #  ifdef __REDIRECT
+>  232: extern int __REDIRECT (lstat,
+>  233:                        (__const char *__restrict __file,
+>  234:                         struct stat *__restrict __buf) __THROW,
+>  235:                        lstat64);
+>  236: #  else
+>  237: #   define lstat lstat64
+>  238: #  endif
+>  239: # endif
+>  240: # ifdef __USE_LARGEFILE64
+>  241: extern int lstat64 (__const char *__restrict __file,
+>  242:                     struct stat64 *__restrict __buf) __THROW;
+>  243: # endif
+>  244: #endif
+
+It says the lstat() needs __USE_BSD or __USE_XOPEN_EXTENDED.  -ansi
+refuses this kind of functions.  There's no problem.  I close this bug.
+
+Regards,
+-- gotom
+
+
+
+    * Bug#178960: marked as done (libc6-dev: sys/stat.h: lstat declaration omitted with -ansi compiler option) Debian Bug Tracking System
+
+    *
+      Reply via email to
+
